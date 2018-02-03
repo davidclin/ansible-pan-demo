@@ -1,5 +1,5 @@
 ---                                                                            
-- hosts: localhost                                                             
+- hosts: paloalto                                                             
   connection: local                                                            
   gather_facts: False                                                          
                                                                                
@@ -7,6 +7,9 @@
     - role: PaloAltoNetworks.paloaltonetworks
 
   tasks:
+    - name: include variables
+      include_vars: vars.yml
+
     - name: configure ethernet1/1 for DHCP                                     
       ignore_errors: yes                                                       
       panos_interface:                                                         
