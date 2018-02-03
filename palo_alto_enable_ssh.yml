@@ -1,0 +1,53 @@
+---                                                                            
+- hosts: localhost                                                             
+  connection: local                                                            
+  gather_facts: False                                                          
+                                                                               
+  roles:                                                                       
+    - role: PaloAltoNetworks.paloaltonetworks
+
+  tasks:
+    - name: configure ethernet1/1 for DHCP                                     
+      ignore_errors: yes                                                       
+      panos_interface:                                                         
+        ip_address: "{{ management_ip }}" 
+        password: "{{admin_password}}"                                         
+        if_name: "ethernet1/1"                                                 
+        zone_name: "{{UntrustedZone}}"                                         
+        create_default_route: "yes"                                            
+        commit: False
+
+    - name: configure ethernet1/2 for DHCP                                     
+      ignore_errors: yes                                                       
+      panos_interface:                                                         
+        ip_address: "{{ management_ip }}" 
+        password: "{{admin_password}}"                                         
+        if_name: "ethernet1/2"                                                 
+        zone_name: "{{TrustedZone}}"                                           
+        create_default_route: "no"                                             
+        commit: False
+
+    - name: create a global service for TCP 22                                 
+      ignore_errors: yes                                                       
+      panos_object:                                                            
+        ip_address: "{{ management_ip }}" 
+        password: "{{admin_password}}"                                         
+        operation: 'add'                                                       
+        serviceobject: 'ssh-22'                                                
+        destination_port: '22'                                                 
+        protocol: 'tcp'                                                        
+        description: 'ssh on 22'
+
+    - name: add a rule to allow SSH                                            
+      ignore_errors: yes                                                       
+      panos_security_rule:                                                     
+        ip_address: "{{ management_ip }}" 
+        password: "{{admin_password}}"                                         
+        operation: 'add'                                                       
+        rule_name: 'SSH traffic'                                               
+        service: 'ssh-22'                                                      
+        description: 'Allow SSH traffic'                                       
+        source_zone: ["{{UntrustedZone}}", "{{TrustedZone}}"]                  
+        destination_zone: ["{{UntrustedZone}}", "{{TrustedZone}}"]             
+        action: 'allow'                                                        
+        commit: "True"

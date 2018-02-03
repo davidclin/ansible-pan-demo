@@ -1,0 +1,5 @@
+management_ip: x.x.x.x 
+admin_password: admin
+admin_username: admin 
+UntrustedZone: "Untrust"
+TrustedZone: "Trust"
